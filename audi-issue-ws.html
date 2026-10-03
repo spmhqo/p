@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audience Issue Discovery Research</title>
+    <link rel="icon" href="spm.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #faf9f6;
+            --surface-color: #ffffff;
+            --border-color: #e2dfdc;
+            --border-focus: #706b63;
+            --text-main: #2c2a29;
+            --text-muted: #6e6963;
+            --accent: #1a1918;
+            --accent-hover: #383532;
+            --success: #2e7d32;
+            --header-color: #4338ca;
+            --font-serif: 'Newsreader', serif;
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 40px 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .document-container {
+            max-width: 760px;
+            margin: 0 auto;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 48px 40px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Header Styles */
+        .doc-header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 30px;
+        }
+
+        .doc-title {
+            font-family: var(--font-serif);
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--header-color);
+            margin-bottom: 8px;
+        }
+
+        .doc-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Section Layout */
+        .section-heading {
+            font-family: var(--font-serif);
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 36px 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .doc-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .doc-input:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            background: var(--surface-color);
+            box-shadow: 0 0 0 3px rgba(112, 107, 99, 0.1);
+        }
+
+        /* Output Box Styling */
+        .output-card {
+            margin-top: 30px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .output-title {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .prompt-preview {
+            width: 100%;
+            min-height: 180px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 16px;
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            color: var(--text-main);
+            line-height: 1.5;
+            resize: vertical;
+            white-space: pre-wrap;
+            margin-bottom: 16px;
+        }
+
+        .copy-btn {
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .copy-btn.copied {
+            background: var(--success);
+        }
+
+        /* Footer */
+        .doc-footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            body {
+                padding: 12px 8px;
+            }
+            .document-container {
+                padding: 24px 16px;
+            }
+            .doc-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="document-container">
+        
+        <!-- Header -->
+        <header class="doc-header">
+            <h1 class="doc-title">Audience Issue Discovery Research</h1>
+            <p class="doc-subtitle">Web Search Version</p>
+        </header>
+
+        <!-- User Inputs Section -->
+        <section>
+            <h2 class="section-heading">1. Variables & Inputs</h2>
+            
+            <div class="input-group">
+                <label class="input-label" for="inputTargetAudience">Target Audience:</label>
+                <textarea id="inputTargetAudience" class="doc-input" placeholder="[INSERT TARGET AUDIENCE]" oninput="updatePrompt()">Beginner creators who want to start an educational YouTube channel in Bengali but struggle with video structuring and audience retention.</textarea>
+            </div>
+        </section>
+
+        <!-- Generated Output Section -->
+        <section>
+            <h2 class="section-heading">2. Generated Output Prompt</h2>
+            
+            <div class="output-card">
+                <div class="output-header">
+                    <span class="output-title">Live Prompt Preview</span>
+                </div>
+                <textarea id="promptOutput" class="prompt-preview" readonly></textarea>
+                <button class="copy-btn" onclick="copyPrompt()">Copy to Clipboard</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="doc-footer">
+            Copyright &copy; <script>document.write(new Date().getFullYear())</script> Siva Prasad Mukherjee. All Rights Reserved.
+        </footer>
+
+    </div>
+
+    <script>
+        // Reusable Prompt Template containing placeholders
+        const template = `You are an Audience Issue Discovery Research Strategist.
+
+Your task is to design a fast, evidence-oriented research workflow that helps me identify the TOP 10 MOST COMMON BUT VERY IMPORTANT ISSUES faced by my target audience.
+
+I will provide ONLY:
+
+TARGET AUDIENCE = {TARGET_AUDIENCE}
+
+You must independently design the entire research strategy from this input.
+
+The workflow must produce:
+
+Target Audience
+→ Audience Situations
+→ Problem Signals
+→ Search Intent
+→ Google Search Strings
+→ Expected Evidence Signals
+→ Source Collection Rules
+→ NotebookLM Master Prompt
+→ Top 10 Audience Issues
+
+
+CORE OBJECTIVE
+
+I do NOT want a generic list of problems.
+
+I want to discover recurring, real-world problems that:
+
+1. Are experienced by multiple members of the target audience.
+2. Create a meaningful obstacle, loss, frustration, risk or limitation.
+3. Matter to the audience's actual goals.
+4. Appear repeatedly in real audience discussions.
+5. Can be supported by evidence from the collected sources.
+
+The final objective is:
+
+TOP 10 MOST COMMON BUT VERY IMPORTANT AUDIENCE ISSUES.
+
+
+IMPORTANT RESEARCH PRINCIPLE
+
+Do not start by asking:
+
+"What are the problems of this audience?"
+
+Instead ask:
+
+"In what real situations does this audience get stuck, struggle, fail, become confused, make mistakes, experience poor results, or fail to achieve what they want?"
+
+Search queries must be derived from those situations.
+
+Therefore:
+
+Audience → Situation → Problem Signal → Search Intent → Search Query
+
+Do NOT skip these stages.
+
+
+STEP 1 — DEFINE THE AUDIENCE
+
+Based only on the Target Audience provided, determine:
+
+1. Who this audience is.
+2. What they are generally trying to achieve.
+3. What stage they are likely to be in.
+4. What major situations they are likely to encounter while trying to achieve that goal.
+
+Do not invent unnecessary demographic characteristics.
+
+Focus on the audience's goal, journey and real-world situations.
+
+
+STEP 2 — IDENTIFY AUDIENCE SITUATIONS
+
+Generate 8–15 specific situations in which the audience may experience problems.
+
+Examples of situation types include:
+
+- deciding what to choose
+- getting started
+- learning something
+- implementing something
+- trying for the first time
+- getting the first result
+- trying to improve an existing result
+- dealing with failure
+- dealing with uncertainty
+- finding customers
+- making money
+- saving money
+- completing a task
+- maintaining results
+- scaling
+- recovering from a mistake
+
+These are examples only.
+
+Choose situations relevant to the Target Audience.
+
+Each situation must describe something the audience actually DOES or TRIES TO DO.
+
+Avoid vague situations such as:
+
+"their overall life"
+"their success"
+"their challenges"
+
+
+STEP 3 — IDENTIFY PROBLEM SIGNALS
+
+For each important situation, identify the natural language signals that indicate the audience is experiencing a problem.
+
+Possible signals include:
+
+struggling
+stuck
+confused
+can't
+cannot
+don't know
+doesn't work
+not working
+failed
+failure
+mistake
+problem
+difficult
+hard
+frustrated
+overwhelmed
+afraid
+worried
+no results
+not getting
+unable to
+why
+how
+first time
+beginner
+help
+advice
+what am I doing wrong
+
+Do NOT use all signals automatically.
+
+Select signals that are appropriate for the specific situation.
+
+
+STEP 4 — IDENTIFY SEARCH INTENT
+
+For every proposed search, define exactly what evidence we are trying to find.
+
+Each search intent must answer:
+
+"What specific audience problem are we trying to uncover through this search?"
+
+Examples:
+
+Bad:
+
+"freelancing problems"
+
+Good:
+
+"beginner freelancers who have learned a skill but cannot get their first client"
+
+Bad:
+
+"small business challenges"
+
+Good:
+
+"small business owners who are getting website visitors but not enquiries"
+
+The search intent must describe a specific observable problem.
+
+
+STEP 5 — GENERATE GOOGLE SEARCH STRINGS
+
+Generate 12–20 highly targeted Google search strings.
+
+Every search string MUST satisfy this formula:
+
+AUDIENCE/SITUATION
++
+SPECIFIC PROBLEM SIGNAL
++
+OPTIONAL PROBLEM CONTEXT
++
+RELEVANT SOURCE
+
+Use source operators where appropriate:
+
+site:reddit.com
+site:quora.com
+
+You may use other relevant community sources if they are appropriate.
+
+Examples of acceptable structures:
+
+site:reddit.com [audience situation] struggling
+
+site:reddit.com [audience situation] "can't"
+
+site:reddit.com [audience situation] "not working"
+
+site:reddit.com [audience situation] frustrated
+
+site:quora.com [audience situation] "how do I"
+
+site:quora.com [audience situation] problem
+
+But do NOT blindly copy these structures.
+
+Adapt them to the Target Audience.
+
+
+STRICT NON-GENERIC SEARCH RULE
+
+You are PROHIBITED from generating search strings that are merely broad topic searches.
+
+Do NOT generate queries such as:
+
+"[audience] problems"
+
+"[audience] challenges"
+
+"[audience] issues"
+
+"[audience] pain points"
+
+"common problems of [audience]"
+
+"challenges faced by [audience]"
+
+"[audience] struggles"
+
+unless the query contains additional situation-specific and problem-specific information that makes it diagnostically useful.
+
+Every search query must reveal a specific problem situation.
+
+If a search query could reasonably return a generic SEO article titled "10 Problems Faced by [Audience]", reject that query and redesign it.
+
+
+STEP 6 — SEARCH DIVERSITY
+
+Do not create 20 variations of the same search.
+
+Distribute searches across different situations.
+
+The search set should cover different stages of the audience journey.
+
+Aim for:
+
+- starting problems
+- decision problems
+- execution problems
+- result problems
+- failure problems
+- recurring problems
+- hidden/underlying problems
+
+Only include categories relevant to the Target Audience.
+
+
+STEP 7 — SEARCH PRIORITY
+
+Divide the search strings into:
+
+MUST SEARCH
+
+and
+
+OPTIONAL / IF TIME PERMITS
+
+The MUST SEARCH group should provide broad coverage with the fewest possible searches.
+
+Prefer approximately 6–10 MUST SEARCH queries.
+
+The remaining queries may be OPTIONAL.
+
+
+STEP 8 — EXPECTED SIGNAL FOR EVERY SEARCH
+
+For EVERY Google search string provide:
+
+Search #
+Search String
+Situation Being Investigated
+Specific Problem Being Investigated
+Expected Signal
+What would make a result valuable
+
+"Expected Signal" must explain what evidence I should look for in the search results.
+
+For example:
+
+Expected Signal:
+Multiple beginners describing that they have learned the skill but are unable to convert that skill into a paid client.
+
+NOT:
+
+Expected Signal:
+Information about freelancing problems.
+
+
+STEP 9 — SOURCE SELECTION
+
+After I run the searches, I will collect useful pages/discussions into NotebookLM.
+
+Tell me exactly what to collect.
+
+Prioritize:
+
+1. First-person experiences.
+2. Questions describing real difficulties.
+3. Discussions containing failure or frustration.
+4. Threads where multiple people report similar experiences.
+5. Detailed discussions.
+6. Discussions containing concrete context.
+7. Discussions describing attempts and outcomes.
+
+Prefer primary audience evidence over commentary about the audience.
+
+Avoid:
+
+- generic SEO articles
+- affiliate content
+- promotional pages
+- AI-generated summaries
+- generic "10 common problems" articles
+- content that merely defines a topic
+- content without evidence of an actual audience experience
+
+
+STEP 10 — FAST SOURCE SELECTION RULE
+
+Create a simple 5-second rule I can use while browsing Google results.
+
+The rule must help me decide:
+
+KEEP
+
+or
+
+SKIP
+
+a result.
+
+The rule must prioritize actual evidence of audience problems rather than article quality alone.
+
+
+STEP 11 — RECOMMENDED SOURCE COUNT
+
+Recommend:
+
+Minimum useful number of sources
+Recommended number of sources
+Maximum practical number before diminishing returns
+
+Do not encourage unnecessary research.
+
+The purpose is:
+
+MINIMUM RESEARCH EFFORT
+→ SUFFICIENT EVIDENCE
+→ RELIABLE TOP 10 ISSUES
+
+
+STEP 12 — CREATE NOTEBOOKLM MASTER PROMPT
+
+Now create ONE complete standalone prompt that I can paste into NotebookLM after uploading the collected sources.
+
+The NotebookLM prompt must instruct NotebookLM to perform the following analysis.
+
+
+A. EXTRACT RAW PROBLEMS
+
+Extract explicit problems, struggles, frustrations, failures, obstacles and recurring questions described by the audience.
+
+Do not yet rank them.
+
+
+B. IDENTIFY UNDERLYING PROBLEMS
+
+Determine whether multiple surface questions are actually describing the same underlying problem.
+
+Example:
+
+"I don't know what skill to learn."
+
+"Which skill should I choose?"
+
+"There are too many skills."
+
+These may represent one underlying issue:
+
+"Difficulty selecting a viable skill."
+
+Do not merge problems unless the evidence supports the connection.
+
+
+C. SEPARATE FOUR LEVELS
+
+For every identified issue distinguish:
+
+1. Surface Question
+2. Observable Problem
+3. Underlying Problem
+4. Consequence
+
+Do not confuse these levels.
+
+
+D. CLUSTER SIMILAR PROBLEMS
+
+Group genuinely similar problems into Core Issue Clusters.
+
+Do not create unnecessary micro-issues.
+
+Do not merge fundamentally different problems.
+
+
+E. DETERMINE COMMONNESS
+
+Estimate how commonly each issue appears across the uploaded evidence.
+
+Use evidence such as:
+
+- repeated appearance across sources
+- independent people describing similar experiences
+- recurrence across different discussions
+- recurrence across different search queries
+
+Do not assume that one long discussion represents many people.
+
+
+F. DETERMINE IMPORTANCE
+
+Determine importance from the consequences documented in the sources.
+
+Consider whether the issue:
+
+- blocks progress
+- prevents the desired result
+- causes repeated failure
+- wastes significant time or money
+- creates repeated mistakes
+- prevents the audience from achieving an important goal
+- creates a significant practical limitation
+
+Do NOT declare something important merely because it sounds serious.
+
+
+G. DISTINGUISH COMMON FROM IMPORTANT
+
+This distinction is mandatory.
+
+A problem can be:
+
+High Commonness + Low Importance
+
+Low Commonness + High Importance
+
+High Commonness + High Importance
+
+Low Commonness + Low Importance
+
+The final Top 10 must prioritize issues that have BOTH:
+
+strong recurrence
+AND
+meaningful consequence.
+
+
+H. EVIDENCE-BASED ANALYSIS
+
+Use only the uploaded sources.
+
+Do not rely on general world knowledge to manufacture unsupported problems.
+
+If an important conclusion is an inference, clearly identify it as an inference.
+
+If evidence is insufficient, say:
+
+"Insufficient evidence."
+
+
+I. FINAL TOP 10 SELECTION
+
+Select the 10 issues with the strongest combination of:
+
+1. Recurrence
+2. Importance
+3. Evidence strength
+4. Relevance to the Target Audience
+
+Do not use numerical scores unless the evidence genuinely supports quantitative measurement.
+
+Do not claim statistical prevalence.
+
+
+STEP 13 — NOTEBOOKLM OUTPUT FORMAT
+
+The NotebookLM prompt must produce:
+
+SECTION 1
+Research Summary
+
+SECTION 2
+Top 10 Most Common but Very Important Audience Issues
+
+For each issue:
+
+Issue #
+Core Issue:
+Observable Problem:
+Underlying Problem:
+Typical Situation:
+Why It Matters:
+Commonness Evidence:
+Importance Evidence:
+Representative Audience Statements:
+Source References:
+
+SECTION 3
+Issue Clusters
+
+Show the smaller questions/problems that belong to each core issue.
+
+SECTION 4
+Commonness vs Importance
+
+For each issue state:
+
+Commonness:
+Very High / High / Moderate / Low
+
+Importance:
+Very High / High / Moderate / Low
+
+These are qualitative evidence-based classifications, not statistical scores.
+
+
+SECTION 5
+Evidence Gaps
+
+Identify important areas where the collected evidence is insufficient.
+
+
+SECTION 6
+FINAL CLEAN LIST
+
+End with ONLY the following:
+
+TOP 10 MOST COMMON BUT VERY IMPORTANT AUDIENCE ISSUES
+
+- Issue 1
+- Issue 2
+- Issue 3
+- Issue 4
+- Issue 5
+- Issue 6
+- Issue 7
+- Issue 8
+- Issue 9
+- Issue 10
+
+
+FINAL QUALITY CONTROL
+
+Before finalizing the Top 10, verify every selected issue against these questions:
+
+1. Is this a genuine audience problem?
+2. Is it supported by actual audience evidence?
+3. Does it recur across multiple sources where possible?
+4. Is it relevant to the Target Audience?
+5. Does it have meaningful consequences?
+6. Is it distinct from the other selected issues?
+7. Is it more useful than a merely topical issue?
+8. Are we confusing a symptom with an underlying problem?
+9. Are we mistaking one person's experience for a common problem?
+10. Are we making any unsupported assumptions?
+
+If an issue fails these checks, replace it with a better-supported issue.
+
+FINAL RESPONSE TO ME
+
+Return ONLY these sections:
+
+1. AUDIENCE RESEARCH DEFINITION
+
+2. AUDIENCE SITUATIONS
+
+3. PROBLEM-SIGNAL MAP
+
+4. GOOGLE SEARCH STRINGS — MUST SEARCH
+
+5. GOOGLE SEARCH STRINGS — OPTIONAL
+
+6. EXPECTED SIGNAL FOR EACH SEARCH
+
+7. WHAT TO COLLECT INTO NOTEBOOKLM
+
+8. 5-SECOND SOURCE SELECTION RULE
+
+9. RECOMMENDED SOURCE COUNT
+
+10. NOTEBOOKLM MASTER PROMPT
+
+Do not provide the Top 10 Audience Issues yourself.
+
+Your job at this stage is to create the research system that will allow the evidence to reveal the Top 10.`;
+
+        // Function to update the prompt in real-time as the user types
+        function updatePrompt() {
+            const targetAudience = document.getElementById('inputTargetAudience').value;
+
+            let finalPrompt = template
+                .replace('{TARGET_AUDIENCE}', targetAudience);
+
+            document.getElementById('promptOutput').value = finalPrompt;
+        }
+
+        // Copy functionality with visual feedback
+        function copyPrompt() {
+            const outputBox = document.getElementById('promptOutput');
+            const btn = document.querySelector('.copy-btn');
+
+            outputBox.select();
+            outputBox.setSelectionRange(0, 99999);
+
+            try {
+                document.execCommand('copy');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+
+                window.getSelection().removeAllRanges();
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            }
+        }
+
+        // Initialize prompt generation on page load
+        window.onload = updatePrompt;
+    </script>
+</body>
+</html>
