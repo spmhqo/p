@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audience Issue Discovery Research</title>
+    <link rel="icon" href="spm.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #faf9f6;
+            --surface-color: #ffffff;
+            --border-color: #e2dfdc;
+            --border-focus: #706b63;
+            --text-main: #2c2a29;
+            --text-muted: #6e6963;
+            --accent: #1a1918;
+            --accent-hover: #383532;
+            --success: #2e7d32;
+            --header-color: #4338ca;
+            --font-serif: 'Newsreader', serif;
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 40px 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .document-container {
+            max-width: 760px;
+            margin: 0 auto;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 48px 40px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Header Styles */
+        .doc-header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 30px;
+        }
+
+        .doc-title {
+            font-family: var(--font-serif);
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--header-color);
+            margin-bottom: 8px;
+        }
+
+        .doc-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Section Layout */
+        .section-heading {
+            font-family: var(--font-serif);
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 36px 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .doc-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            color: var(--text-main);
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .doc-input:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            background: var(--surface-color);
+            box-shadow: 0 0 0 3px rgba(112, 107, 99, 0.1);
+        }
+
+        /* Output Box Styling */
+        .output-card {
+            margin-top: 30px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .output-title {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .prompt-preview {
+            width: 100%;
+            min-height: 180px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 16px;
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            color: var(--text-main);
+            line-height: 1.5;
+            resize: vertical;
+            white-space: pre-wrap;
+            margin-bottom: 16px;
+        }
+
+        .copy-btn {
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .copy-btn.copied {
+            background: var(--success);
+        }
+
+        /* Footer */
+        .doc-footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            body {
+                padding: 12px 8px;
+            }
+            .document-container {
+                padding: 24px 16px;
+            }
+            .doc-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="document-container">
+        
+        <!-- Header -->
+        <header class="doc-header">
+            <h1 class="doc-title">Audience Issue Discovery Research</h1>
+            <p class="doc-subtitle">Design the fastest practical YouTube → NotebookLM research workflow for identifying target audience issues.</p>
+        </header>
+
+        <!-- User Inputs Section -->
+        <section>
+            <h2 class="section-heading">1. Variables & Inputs</h2>
+            
+            <div class="input-group">
+                <label class="input-label" for="inputTargetAudience">Target Audience:</label>
+                <textarea id="inputTargetAudience" class="doc-input" placeholder="[INSERT TARGET AUDIENCE]" oninput="updatePrompt()">Beginner creators who want to start an educational YouTube channel in Bengali but struggle with video structuring and audience retention.</textarea>
+            </div>
+        </section>
+
+        <!-- Generated Output Section -->
+        <section>
+            <h2 class="section-heading">2. Generated Output Prompt</h2>
+            
+            <div class="output-card">
+                <div class="output-header">
+                    <span class="output-title">Live Prompt Preview</span>
+                </div>
+                <textarea id="promptOutput" class="prompt-preview" readonly></textarea>
+                <button class="copy-btn" onclick="copyPrompt()">Copy to Clipboard</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="doc-footer">
+            Copyright &copy; <script>document.write(new Date().getFullYear())</script> Siva Prasad Mukherjee. All Rights Reserved.
+        </footer>
+
+    </div>
+
+    <script>
+        // Reusable Prompt Template containing placeholders
+        const template = `You are a YouTube Audience Issue Research Strategist.
+
+Your task is to design the fastest practical YouTube → NotebookLM research workflow for identifying the TOP 10 MOST COMMON BUT VERY IMPORTANT ISSUES faced by a specific target audience.
+
+INPUT
+
+TARGET AUDIENCE = {TARGET_AUDIENCE}
+
+You must independently design the entire research strategy from this input.
+
+The workflow must be optimized for:
+
+MINIMUM MANUAL RESEARCH
++
+MAXIMUM AUDIENCE EVIDENCE
++
+RELIABLE TOP 10 ISSUES
+
+
+CORE OBJECTIVE
+
+I do NOT want a generic list of audience problems.
+
+I want to discover real, recurring and important problems that the target audience actually experiences.
+
+The final objective is:
+
+TOP 10 MOST COMMON BUT VERY IMPORTANT AUDIENCE ISSUES.
+
+A problem qualifies only when there is meaningful evidence of both:
+
+1. RECURRENCE — the problem appears repeatedly across audience evidence.
+2. IMPORTANCE — the problem has meaningful consequences for the audience's goal or progress.
+
+
+IMPORTANT PRINCIPLE
+
+Do not begin with:
+
+"What are the problems of this audience?"
+
+Instead determine:
+
+1. What is this audience trying to achieve?
+2. What situations do they encounter while trying to achieve it?
+3. Where do they get stuck?
+4. What repeatedly fails?
+5. What questions do they repeatedly ask?
+6. What problems are creators repeatedly making videos about?
+7. What problems do viewers repeatedly reveal in comments?
+
+The research logic must therefore be:
+
+TARGET AUDIENCE
+→ GOAL
+→ AUDIENCE SITUATIONS
+→ PROBLEM SIGNALS
+→ YOUTUBE SEARCH INTENTS
+→ HIGH-SIGNAL VIDEOS
+→ NOTEBOOKLM
+→ VIDEO + TRANSCRIPT + COMMENTS ANALYSIS
+→ ISSUE CLUSTERING
+→ RECURRENCE + IMPORTANCE
+→ TOP 10 ISSUES
+
+
+STEP 1 — DEFINE THE AUDIENCE
+
+Based on the Target Audience, determine:
+
+1. Who they are.
+2. What they are trying to achieve.
+3. What stage they are likely to be in.
+4. What major situations they encounter while pursuing that goal.
+
+Do not invent unnecessary demographic characteristics.
+
+Focus on goals, situations, behaviour and observable problems.
+
+
+STEP 2 — IDENTIFY AUDIENCE SITUATIONS
+
+Generate 8–15 specific situations in which this audience may experience problems.
+
+A situation must describe something the audience actually tries to do.
+
+Examples:
+
+- getting started
+- choosing between alternatives
+- learning something
+- implementing something
+- getting the first result
+- improving an existing result
+- dealing with failure
+- finding customers
+- earning money
+- making an important decision
+- fixing something that is not working
+- maintaining results
+- scaling
+
+These are examples only.
+
+Use only situations relevant to the Target Audience.
+
+
+STEP 3 — IDENTIFY PROBLEM SIGNALS
+
+For each important situation identify relevant problem signals.
+
+Possible signals include:
+
+struggling
+stuck
+confused
+can't
+cannot
+don't know
+not working
+failed
+failure
+mistake
+difficult
+hard
+frustrated
+overwhelmed
+no results
+not getting
+unable to
+why
+how
+help
+advice
+beginner
+first time
+wrong
+problem
+still can't
+tried but
+
+Do not automatically use all signals.
+
+Select only signals appropriate to each situation.
+
+
+STEP 4 — CREATE YOUTUBE SEARCH INTENTS
+
+For each important situation define a specific YouTube search intent.
+
+Each search intent must answer:
+
+"What exact audience problem are we trying to discover?"
+
+BAD:
+
+freelancing problems
+
+GOOD:
+
+beginner freelancers unable to get their first client
+
+BAD:
+
+small business problems
+
+GOOD:
+
+small business owners getting website visitors but not receiving enquiries
+
+The search intent must describe an observable problem.
+
+
+STEP 5 — GENERATE HIGH-SIGNAL YOUTUBE SEARCH STRINGS
+
+Create approximately 10–18 targeted YouTube search strings.
+
+Every search string must be designed to reveal a specific problem situation.
+
+Use combinations of:
+
+AUDIENCE
++
+SITUATION
++
+PROBLEM SIGNAL
+
+Examples:
+
+beginner freelancer can't get first client
+
+beginner freelancer no response proposals
+
+freelancer learned skill but no clients
+
+beginner freelancer portfolio no experience
+
+These are examples only.
+
+Adapt all queries to the Target Audience.
+
+
+STRICT NON-GENERIC SEARCH RULE
+
+Do NOT generate generic searches such as:
+
+"[audience] problems"
+"[audience] challenges"
+"[audience] issues"
+"[audience] pain points"
+"common problems of [audience]"
+"[audience] struggles"
+
+unless the query contains enough additional context to expose a specific problem.
+
+Every search string must be diagnostically useful.
+
+If a query could simply produce generic "10 problems of [audience]" videos, reject it and redesign it.
+
+
+STEP 6 — SEARCH DIVERSITY
+
+Do not create many variations of the same problem.
+
+Distribute searches across different audience situations.
+
+Where relevant, cover:
+
+- starting problems
+- decision problems
+- learning problems
+- implementation problems
+- result problems
+- failure problems
+- recurring problems
+- hidden or underlying problems
+
+Only include categories relevant to this audience.
+
+
+STEP 7 — SEARCH PRIORITY
+
+Divide the search strings into:
+
+MUST SEARCH
+
+and
+
+OPTIONAL / IF TIME PERMITS
+
+The MUST SEARCH group should contain approximately 6–8 searches providing the strongest coverage.
+
+The objective is:
+
+MINIMUM SEARCH EFFORT
+→ MAXIMUM PROBLEM SIGNAL
+
+
+STEP 8 — EXPECTED SIGNAL
+
+For EVERY search provide:
+
+Search #
+YouTube Search String
+Situation Being Investigated
+Specific Problem Being Investigated
+Expected Creator Signal
+Expected Audience Signal
+
+Expected Creator Signal:
+
+What kinds of videos would indicate that this problem is repeatedly being addressed?
+
+Expected Audience Signal:
+
+What kinds of comments would indicate that real audience members are experiencing this problem?
+
+Keep creator evidence and audience evidence separate.
+
+
+STEP 9 — MINIMAL VIDEO SOURCE-SELECTION STRATEGY
+
+The user should NOT be required to watch every video.
+
+The user should NOT be required to manually read comments.
+
+The user's manual task should be limited to selecting potentially relevant YouTube videos and providing them to NotebookLM.
+
+For each MUST SEARCH query, recommend approximately 2–4 potentially useful videos, where practical.
+
+Prioritize videos that:
+
+1. Directly address a specific problem.
+2. Are clearly relevant to the Target Audience.
+3. Have meaningful audience discussion.
+4. Contain substantial comments.
+5. Represent different situations or perspectives.
+6. Are likely to reveal real audience problems.
+
+Do NOT select videos merely because:
+
+- they have high views
+- the creator is famous
+- the title is attractive
+- the video ranks highly
+
+View count is a discovery signal, NOT proof of problem prevalence.
+
+
+STEP 10 — SOURCE DIVERSITY
+
+Avoid selecting many videos from the same creator unless there is a specific research reason.
+
+Prefer independent creators discussing the same problem.
+
+The purpose is cross-video validation.
+
+Where possible, select videos representing:
+
+- different creators
+- different approaches
+- different audience situations
+- different problem framings
+
+
+STEP 11 — NOTEBOOKLM DOES THE COMMENT ANALYSIS
+
+Do NOT require the user to manually select comments.
+
+Do NOT require the user to manually categorize comments.
+
+Do NOT require the user to manually identify audience problems from comments.
+
+After the selected YouTube videos and their available transcripts/comments are provided to NotebookLM, NotebookLM must perform the analysis automatically.
+
+NotebookLM must examine:
+
+- video content
+- transcripts
+- audience comments
+- comment replies where useful
+
+
+STEP 12 — CREATOR SIGNAL VS AUDIENCE SIGNAL
+
+This distinction is mandatory.
+
+If a creator says:
+
+"Most beginners struggle with X"
+
+record this as:
+
+CREATOR CLAIM
+
+Do NOT treat it as proof of prevalence.
+
+Look for:
+
+AUDIENCE EVIDENCE
+
+such as:
+
+- viewers describing X
+- viewers asking about X
+- multiple viewers confirming X
+- similar experiences across multiple videos
+- repeated failed attempts
+
+Audience evidence should carry greater weight than unsupported creator claims.
+
+
+STEP 13 — NOTEBOOKLM COMMENT ANALYSIS
+
+Instruct NotebookLM to automatically identify:
+
+1. First-person experiences.
+2. Explicit problems.
+3. Repeated questions.
+4. Frustrations.
+5. Failed attempts.
+6. Obstacles.
+7. Requests for help.
+8. Statements confirming the same problem.
+9. Comments describing what the viewer tried.
+10. Comments describing what happened after trying.
+11. Repeated problems across different videos.
+12. Problems mentioned by audiences that creators do not explicitly identify.
+
+Ignore:
+
+- simple praise
+- emojis
+- generic thanks
+- spam
+- promotion
+- unrelated discussion
+- comments without meaningful problem information
+
+
+STEP 14 — AUDIENCE-REVEALED ISSUES
+
+This is a high-priority research objective.
+
+Instruct NotebookLM to identify problems that:
+
+1. Repeatedly appear in audience comments,
+2. but are not clearly articulated by the creators.
+
+Label these:
+
+AUDIENCE-REVEALED ISSUE
+
+These may represent hidden or unuttered audience demand.
+
+Do not assume that every such issue is important.
+
+Validate recurrence and consequences before including it in the final Top 10.
+
+
+STEP 15 — ISSUE EXTRACTION
+
+NotebookLM must extract:
+
+- surface questions
+- observable problems
+- underlying problems
+- consequences
+- attempted solutions
+- reasons those attempts failed, when supported
+
+Do not immediately treat every question as a separate issue.
+
+
+STEP 16 — ISSUE CLUSTERING
+
+Group genuinely similar problems into Core Issue Clusters.
+
+Example:
+
+"I don't know what skill to learn."
+
+"Which skill should I choose?"
+
+"There are too many skills."
+
+may represent:
+
+CORE ISSUE:
+Difficulty selecting a viable skill.
+
+But do NOT merge problems merely because they are related.
+
+Keep genuinely different problems separate.
+
+
+STEP 17 — COMMONNESS
+
+Assess commonness using qualitative evidence such as:
+
+- recurrence across independent videos
+- recurrence across independent commenters
+- recurrence across different comment sections
+- repeated questions
+- repeated first-person experiences
+- cross-video confirmation
+
+Use these categories:
+
+Very High
+High
+Moderate
+Low
+
+Do NOT claim statistical prevalence.
+
+Do NOT use video views as a proxy for audience prevalence.
+
+
+STEP 18 — IMPORTANCE
+
+Assess importance based on documented consequences.
+
+Consider whether the issue:
+
+- blocks progress
+- prevents the desired result
+- causes repeated failure
+- wastes significant time
+- wastes money
+- causes repeated mistakes
+- prevents income or achievement
+- creates a major obstacle
+- causes repeated help-seeking
+
+Use:
+
+Very High
+High
+Moderate
+Low
+
+Do not call an issue important merely because it is frequently discussed.
+
+
+STEP 19 — COMMONNESS VS IMPORTANCE
+
+Explicitly distinguish:
+
+High Commonness + Low Importance
+
+Low Commonness + High Importance
+
+High Commonness + High Importance
+
+Low Commonness + Low Importance
+
+The final Top 10 should primarily contain:
+
+HIGH COMMONNESS
++
+HIGH IMPORTANCE
+
+
+STEP 20 — BURNING ISSUE SIGNALS
+
+Pay special attention to evidence of:
+
+- repeated attempts
+- repeated failure
+- ongoing frustration
+- urgency
+- repeated help-seeking
+- multiple people confirming the same problem
+- people saying they have tried several solutions
+- people still experiencing the problem despite trying solutions
+
+These signals can strengthen the assessment of importance.
+
+They do NOT automatically prove commonness.
+
+
+STEP 21 — FINAL TOP 10 SELECTION
+
+Select the 10 issues with the strongest combination of:
+
+1. Recurrence
+2. Importance
+3. Evidence strength
+4. Cross-video confirmation
+5. Audience relevance
+
+Do not use numerical scores unless the evidence genuinely supports them.
+
+Do not produce an overall score or ranking beyond selecting the Top 10 requested issues.
+
+
+STEP 22 — EVIDENCE GAPS
+
+Identify:
+
+- important areas with insufficient evidence
+- issues suggested by creators but weakly supported by audiences
+- issues appearing in comments but with insufficient recurrence
+- situations that require further research
+
+Do not fill evidence gaps with assumptions.
+
+
+STEP 23 — NOTEBOOKLM MASTER PROMPT
+
+Now create ONE complete standalone prompt that can be pasted into NotebookLM after the selected YouTube sources have been uploaded.
+
+The NotebookLM prompt must contain all necessary instructions for:
+
+- transcript analysis
+- creator-claim extraction
+- comment analysis
+- audience-problem extraction
+- issue clustering
+- underlying-problem identification
+- recurrence analysis
+- importance analysis
+- audience-revealed issue detection
+- final Top 10 selection
+
+The NotebookLM prompt must NOT require the user to manually categorize videos or comments.
+
+
+STEP 24 — RECOMMENDED SOURCE COUNT
+
+Recommend:
+
+Minimum number of videos:
+Recommended number of videos:
+Approximate useful comment volume:
+
+Keep the numbers practical.
+
+The goal is:
+
+MINIMUM SOURCE COLLECTION
+→ SUFFICIENT EVIDENCE
+→ RELIABLE ISSUE DISCOVERY
+
+
+STEP 25 — FINAL OUTPUT FROM THIS CHATGPT PROMPT
+
+Return ONLY these sections:
+
+1. AUDIENCE RESEARCH DEFINITION
+
+2. AUDIENCE SITUATIONS
+
+3. PROBLEM-SIGNAL MAP
+
+4. YOUTUBE SEARCH INTENTS
+
+5. YOUTUBE SEARCH STRINGS — MUST SEARCH
+
+6. YOUTUBE SEARCH STRINGS — OPTIONAL
+
+7. EXPECTED CREATOR SIGNAL + EXPECTED AUDIENCE SIGNAL
+
+8. MINIMAL VIDEO SOURCE-SELECTION STRATEGY
+
+9. RECOMMENDED SOURCE COUNT
+
+10. NOTEBOOKLM MASTER PROMPT
+
+
+IMPORTANT:
+
+Do NOT generate the Top 10 Audience Issues yourself.
+
+Your job is to design the research system.
+
+The evidence collected from YouTube and analysed by NotebookLM must determine the final Top 10.`;
+
+        // Function to update the prompt in real-time as the user types
+        function updatePrompt() {
+            const targetAudience = document.getElementById('inputTargetAudience').value;
+
+            let finalPrompt = template
+                .replace('{TARGET_AUDIENCE}', targetAudience);
+
+            document.getElementById('promptOutput').value = finalPrompt;
+        }
+
+        // Copy functionality with visual feedback
+        function copyPrompt() {
+            const outputBox = document.getElementById('promptOutput');
+            const btn = document.querySelector('.copy-btn');
+
+            outputBox.select();
+            outputBox.setSelectionRange(0, 99999);
+
+            try {
+                document.execCommand('copy');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+
+                window.getSelection().removeAllRanges();
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            }
+        }
+
+        // Initialize prompt generation on page load
+        window.onload = updatePrompt;
+    </script>
+</body>
+</html>
